@@ -7,6 +7,8 @@ import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -19,15 +21,22 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
+    var runnable: Runnable = Runnable {}
+    var handler: Handler = Handler(Looper.getMainLooper())
+
     private lateinit var sharedPref: SharedPreferences
     private lateinit var buttonSave: Button;
     private lateinit var buttonDelete: Button;
+    private lateinit var btnStop: Button;
+    private lateinit var btnStart: Button;
     private lateinit var buttonTest: Button;
     private lateinit var txtAge: EditText;
     private lateinit var txtResult: TextView;
     private lateinit var txtTimer: TextView;
+    private lateinit var txtRunner: TextView;
 
     private var ageFromPref: Int? = null;
+    var currentCount: Int = 0;
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,10 +47,36 @@ class MainActivity : AppCompatActivity() {
         countDownOperations();
     }
 
+    fun startTimer(view: View) {
+        triggerPlus();
+        btnStart.isEnabled = false;
+        btnStop.isEnabled = true;
+    }
+
+    fun stopTimer(view: View) {
+        btnStart.isEnabled = true;
+        btnStop.isEnabled = false;
+
+        handler.removeCallbacks(runnable);
+        currentCount = 0;
+        txtRunner.text = "00:00:00";
+    }
+
+    fun triggerPlus() {
+        runnable = object : Runnable {
+            override fun run() {
+                currentCount++;
+                txtRunner.text = currentCount.toString();
+
+                handler.postDelayed(this,1000);
+            }
+        }
+        handler.post(runnable)
+    }
+
     private fun countDownOperations() {
         object : CountDownTimer(10000, 1000) {
             override fun onTick(p0: Long) {
-                println("ss")
                 txtTimer.text = "${p0 / 1000}";
             }
 
@@ -109,9 +144,12 @@ class MainActivity : AppCompatActivity() {
         buttonSave = binding.btnSave;
         buttonDelete = binding.btnDelete;
         buttonTest = binding.btnTest
+        btnStart = binding.btnStarter
+        btnStop = binding.btnStopper
         txtAge = binding.txtAge;
         txtResult = binding.txtResult;
         txtTimer = binding.txtCountDown;
+        txtRunner = binding.txtRunner;
 
         sharedPref = this.getSharedPreferences("henimex.storage.data", Context.MODE_PRIVATE)
         ageFromPref = this.sharedPref.getInt("age_data", -1)

@@ -1,8 +1,8 @@
 package com.hendev.storingdatacomps
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.DialogInterface
+import android.content.Intent
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -13,11 +13,11 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import com.hendev.storingdatacomps.databinding.ActivityMainBinding
-import kotlinx.coroutines.delay
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+
     private lateinit var sharedPref: SharedPreferences
     private lateinit var buttonSave: Button;
     private lateinit var buttonDelete: Button;
@@ -35,8 +35,14 @@ class MainActivity : AppCompatActivity() {
         assignBindings();
     }
 
-    fun methodTests(view: View){
-        testMethod();
+    fun methodTests(view: View) {
+        goToNextPage()
+    }
+
+    private fun goToNextPage() {
+        val intent = Intent(this@MainActivity, NextPage::class.java)
+        intent.putExtra("age_data",ageFromPref);
+        startActivity(intent);
     }
 
     fun save(view: View) {
@@ -51,9 +57,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun delete(view: View) {
-
-        val testValue = confirmationDialog();
-        createToast(testValue.toString());
         if (ageFromPref != null && ageFromPref != -1) {
             sharedPref.edit().remove("age_data").apply();
             this.txtResult.text = "Age Information Removed";
@@ -83,11 +86,6 @@ class MainActivity : AppCompatActivity() {
 
         alert.show();
         return status;
-    }
-
-    fun testMethod(){
-        val data = confirmationDialog()
-        println(data.toString())
     }
 
     private fun assignBindings() {
